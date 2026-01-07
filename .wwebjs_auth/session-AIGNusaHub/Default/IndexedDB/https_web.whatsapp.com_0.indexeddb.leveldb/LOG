@@ -1,0 +1,15 @@
+2026/01/07-20:47:53.670 ba48 Reusing MANIFEST D:\New Downloads\AIGNusaHub\bot-wa\.wwebjs_auth\session-AIGNusaHub\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/01/07-20:47:53.672 ba48 Recovering log #94
+2026/01/07-20:47:53.698 ba48 Reusing old log D:\New Downloads\AIGNusaHub\bot-wa\.wwebjs_auth\session-AIGNusaHub\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000094.log 
+2026/01/07-20:47:55.210 b220 Level-0 table #99: started
+2026/01/07-20:47:55.220 b220 Level-0 table #99: 172376 bytes OK
+2026/01/07-20:47:55.224 b220 Delete type=0 #94
+2026/01/07-20:47:55.225 b220 Manual compaction at level-0 from '\x00(\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00)\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/01/07-20:47:55.293 ba48 Compacting 1@1 + 1@2 files
+2026/01/07-20:47:55.454 ba48 Generated table #100@1: 46382 keys, 2212573 bytes
+2026/01/07-20:47:55.461 ba48 Generated table #101@1: 1682 keys, 36532 bytes
+2026/01/07-20:47:55.461 ba48 Compacted 1@1 + 1@2 files => 2249105 bytes
+2026/01/07-20:47:55.464 ba48 compacted to: files[ 0 0 2 0 0 0 0 ]
+2026/01/07-20:47:55.464 ba48 Delete type=2 #96
+2026/01/07-20:47:55.464 ba48 Delete type=2 #99
+2026/01/07-20:52:56.347 6b70 Manual compaction at level-0 from '\x00)\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00*\x00\x00\x00' @ 0 : 0; will stop at (end)
