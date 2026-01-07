@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment variables (PENTING! Jangan upload credentials)
+.env
+.env.local
+.env.production
+
+# WhatsApp Session (SANGAT PENTING! Jangan upload session)
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build output
+dist/
+build/
+
+# Egg file (khusus Pterodactyl, tidak perlu di VPS)
+egg-*.json
