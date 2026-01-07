@@ -3,7 +3,6 @@ const { LocalAuth, Client, MessageMedia } = require("whatsapp-web.js");
 
 // Deteksi OS dan environment untuk menentukan path Chrome/Chromium
 const getChromePath = () => {
-  // Jika ada environment variable CHROME_PATH (untuk Pterodactyl/Docker)
   if (process.env.CHROME_PATH) {
     return process.env.CHROME_PATH;
   }
@@ -13,25 +12,28 @@ const getChromePath = () => {
   } else if (process.platform === "darwin") {
     return "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   } else {
-    // Linux/Docker/Pterodactyl - cek beberapa lokasi umum
     const fs = require("fs");
     const possiblePaths = [
-      "/usr/bin/chromium-browser",
-      "/usr/bin/chromium",
       "/usr/bin/google-chrome-stable",
       "/usr/bin/google-chrome",
+      "/usr/bin/chromium-browser",
+      "/usr/bin/chromium",
     ];
 
     for (const path of possiblePaths) {
       if (fs.existsSync(path)) {
+        console.log(`Chrome ditemukan di: ${path}`);
         return path;
       }
     }
 
-    // Default fallback
-    return "/usr/bin/chromium-browser";
+    return "/usr/bin/google-chrome-stable";
   }
 };
+
+let clientReady = false;
+let initAttempts = 0;
+const MAX_ATTEMPTS = 3;
 
 const client = new Client({
   authStrategy: new LocalAuth({
@@ -41,66 +43,104 @@ const client = new Client({
   puppeteer: {
     headless: true,
     executablePath: getChromePath(),
+    timeout: 60000,
     args: [
       "--disable-gpu",
       "--disable-software-rasterizer",
       "--disable-dev-shm-usage",
-      "--disable-setuid-sandbox",
       "--no-sandbox",
-      "--no-first-run",
-      "--no-zygote",
-      "--single-process",
+      "--disable-setuid-sandbox",
       "--disable-extensions",
-      "--disable-background-timer-throttling",
-      "--disable-backgrounding-occluded-windows",
-      "--disable-renderer-backgrounding",
+      "--disable-sync",
+      "--disable-translate",
+      "--no-first-run",
+      "--disable-default-apps",
       "--disable-background-networking",
       "--disable-breakpad",
-      "--disable-component-extensions-with-background-pages",
-      "--disable-features=TranslateUI,BlinkGenPropertyTrees",
-      "--disable-ipc-flooding-protection",
       "--disable-hang-monitor",
+      "--disable-popup-blocking",
       "--disable-prompt-on-repost",
-      "--disable-sync",
-      "--force-color-profile=srgb",
+      "--disable-ipc-flooding-protection",
+      "--disable-component-extensions-with-background-pages",
       "--metrics-recording-only",
-      "--safebrowsing-disable-auto-update",
-      "--password-store=basic",
-      "--use-mock-keychain",
-      "--no-default-browser-check",
       "--mute-audio",
-      "--hide-scrollbars",
-      "--window-size=1280,720",
-      "--disable-blink-features=AutomationControlled",
+      "--no-zygote",
+      "--no-sandbox",
     ],
-  },
-  webVersionCache: {
-    type: "remote",
-    remotePath:
-      "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
   },
 });
 
 client.on("qr", (qr) => {
-  console.log("Scan QR Code berikut untuk login:");
+  console.log("📱 Scan QR Code berikut untuk login:");
   qrcode.generate(qr, { small: true });
 });
 
 client.on("authenticated", () => {
-  console.log("Client is authenticated");
+  console.log("✅ Client is authenticated");
+  clientReady = true;
+  initAttempts = 0;
 });
 
 client.on("ready", () => {
-  console.log("Client is ready!");
+  console.log("🚀 Client is ready!");
+  clientReady = true;
 });
 
 client.on("auth_failure", (msg) => {
-  console.error("Authentication failed:", msg);
+  console.error("❌ Authentication failed:", msg);
 });
 
 client.on("disconnected", (reason) => {
-  console.log("Client disconnected:", reason);
+  console.log("⚠️ Client disconnected:", reason);
+  clientReady = false;
+
+  // Auto-reconnect setelah 10 detik
+  setTimeout(() => {
+    if (!clientReady) {
+      console.log("🔄 Attempting to reconnect...");
+      client.initialize().catch((err) => {
+        console.error("❌ Reconnect failed:", err.message);
+      });
+    }
+  }, 10000);
 });
+
+client.on("error", (err) => {
+  console.error("❌ Client error:", err.message);
+});
+
+// Initialize dengan retry logic
+const initializeClient = async () => {
+  try {
+    console.log(
+      `🔄 Initializing WhatsApp Client (Attempt ${
+        initAttempts + 1
+      }/${MAX_ATTEMPTS})...`
+    );
+    await client.initialize();
+  } catch (error) {
+    initAttempts++;
+    console.error(`❌ Initialization failed:`, error.message);
+
+    if (initAttempts < MAX_ATTEMPTS) {
+      console.log(`⏳ Retrying in 5 seconds...`);
+      setTimeout(() => {
+        initializeClient();
+      }, 5000);
+    } else {
+      console.error(
+        "❌ Max initialization attempts reached. Please check Chrome installation."
+      );
+      console.error(
+        "Tip: Run 'google-chrome-stable --version' to verify Chrome is installed"
+      );
+      process.exit(1);
+    }
+  }
+};
+
+// Start initialization
+initializeClient();
 
 const sendMessage = async (number, message) => {
   const state = await client.getState();
