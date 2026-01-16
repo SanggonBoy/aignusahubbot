@@ -31,5 +31,5 @@ Thumbs.db
 dist/
 build/
 
-# Egg file (khusus Pterodactyl, tidak perlu di VPS)
-egg-*.json
+# Firebase service account key
+serviceAccountKey.json

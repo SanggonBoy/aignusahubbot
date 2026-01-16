@@ -48,63 +48,63 @@ const client = new Client({
 });
 
 client.on("qr", (qr) => {
-  console.log("📱 Scan QR Code berikut untuk login:");
+  console.log("QR Code is Ready");
   qrcode.generate(qr, { small: true });
 });
 
 client.on("authenticated", () => {
-  console.log("✅ Client is authenticated");
+  console.log("Client is authenticated");
   // clientReady = true;
   // initAttempts = 0;
 });
 
 client.on("ready", () => {
-  console.log("🚀 Client is ready!");
+  console.log("Client is ready!");
   // clientReady = true;
 });
 
 // client.on("auth_failure", (msg) => {
-//   console.error("❌ Authentication failed:", msg);
+//   console.error("Authentication failed:", msg);
 // });
 
 // client.on("disconnected", (reason) => {
-//   console.log("⚠️ Client disconnected:", reason);
+//   console.log("Client disconnected:", reason);
 //   clientReady = false;
 
 //   setTimeout(() => {
 //     if (!clientReady) {
-//       console.log("🔄 Attempting to reconnect...");
+//       console.log("Attempting to reconnect...");
 //       client.initialize().catch((err) => {
-//         console.error("❌ Reconnect failed:", err.message);
+//         console.error("Reconnect failed:", err.message);
 //       });
 //     }
 //   }, 10000);
 // });
 
 // client.on("error", (err) => {
-//   console.error("❌ Client error:", err.message);
+//   console.error("Client error:", err.message);
 // });
 
 // const initializeClient = async () => {
 //   try {
 //     console.log(
-//       `🔄 Initializing WhatsApp Client (Attempt ${
+//       `Initializing WhatsApp Client (Attempt ${
 //         initAttempts + 1
 //       }/${MAX_ATTEMPTS})...`
 //     );
 //     await client.initialize();
 //   } catch (error) {
 //     initAttempts++;
-//     console.error(`❌ Initialization failed:`, error.message);
+//     console.error(`Initialization failed:`, error.message);
 
 //     if (initAttempts < MAX_ATTEMPTS) {
-//       console.log(`⏳ Retrying in 5 seconds...`);
+//       console.log(`Retrying in 5 seconds...`);
 //       setTimeout(() => {
 //         initializeClient();
 //       }, 5000);
 //     } else {
 //       console.error(
-//         "❌ Max initialization attempts reached. Please check Chrome installation."
+//         "Max initialization attempts reached. Please check Chrome installation."
 //       );
 //       console.error(
 //         "Tip: Run 'google-chrome-stable --version' to verify Chrome is installed"
@@ -119,7 +119,7 @@ client.on("ready", () => {
 const sendMessage = async (number, message) => {
   const state = await client.getState();
   if (state !== "CONNECTED") {
-    throw new Error("WhatsApp client is not ready");
+    return { status: "error", message: "WhatsApp client is not ready" };
   }
 
   let formattedNumber = number.replace(/[^\d]/g, "");
@@ -130,8 +130,19 @@ const sendMessage = async (number, message) => {
 
   formattedNumber = formattedNumber + "@c.us";
 
-  await client.sendMessage(formattedNumber, message);
-  return { status: "success", message: "Message sent successfully" };
+  try {
+    await client.sendMessage(formattedNumber, message, { sendSeen: false });
+    return { status: "success", message: "Message sent successfully" };
+  } catch (err) {
+    console.error(
+      "❌ Failed to send message:",
+      err && err.message ? err.message : err
+    );
+    return {
+      status: "error",
+      message: err && err.message ? err.message : String(err),
+    };
+  }
 };
 
 module.exports = {

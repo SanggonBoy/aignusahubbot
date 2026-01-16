@@ -7,14 +7,14 @@ const authMiddleware = (req, res, next) => {
 
   const validation = validateApiKey(apiKey);
 
-  if (!validation.valid) {
+  if (validation.status !== "success") {
     return res.status(401).json({
       status: "error",
       message: validation.message || "Unauthorized access",
     });
   }
 
-  req.user = validation.user;
+  req.user = validation.data;
 
   next();
 };

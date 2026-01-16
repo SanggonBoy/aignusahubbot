@@ -1,47 +1,54 @@
-const { API } = require("../routes/api");
-const axios = require("axios");
+const { json } = require("express");
+const admin = require("firebase-admin");
+const serviceAccount = require("../serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+console.log("Berhasil Koneksi ke Firestore");
 
 let identifierData = [];
-
-const fetchIdentifierData = async () => {
+async function fetchIdentifierData() {
   try {
-    const response = await axios.get(`${API}users`);
-    identifierData = response.data;
-    console.log("Identifier data loaded successfully");
-    return identifierData;
+    const userDoc = await db.collection("users").get();
+
+    if(userDoc.empty) {
+      console.log("Tidak ada data ditemukan.");
+      identifierData = [];
+      return;
+    }
+
+    const allUsers = [];
+    userDoc.forEach(doc => {
+      allUsers.push({ apiKey: doc.id, ...doc.data() });
+    })
+    identifierData = allUsers;
+    console.log(`Berhasil memuat ${identifierData.length} API Keys.`);
   } catch (error) {
-    console.error("Error fetching identifier data:", error.message);
-    throw error;
+    console.log(error);
+    return json({ status: "error", message: "Error fetching identifier data" });
   }
-};
+}
 
-const getIdentifierData = () => {
-  return identifierData;
-};
-
-const validateApiKey = (apiKey) => {
-  if (!apiKey) return { valid: false, message: "API key is required" };
-  if (!identifierData || identifierData.length === 0) {
-    return { valid: false, message: "Identifier data not loaded" };
-  }
-
-  // Cari apakah API key cocok dengan data dari backend
-  // Sesuaikan field 'key' dengan struktur data dari backend Anda
-  const user = identifierData.find(
-    (item) => item.apiKey === apiKey
-  );
+function validateApiKey(apiKey) {
+  if (!apiKey) return { status: "error", message: "API key is required" };
+  const user = identifierData.find((user) => user.apiKey === apiKey);
 
   if (user) {
-    return { valid: true, user };
+    return { status: "success", data: user };
   }
 
-  return { valid: false, message: "Invalid API key" };
-};
+  return { status: "error", message: "Invalid API key" };
+}
 
-const startAutoRefresh = (intervalMs = 60000) => {
-    
+function getIdentifierData() {
+  return identifierData;
+}
+
+function startAutoRefresh(intervalMs = 60000) {
   fetchIdentifierData();
-
   setInterval(async () => {
     try {
       await fetchIdentifierData();
@@ -49,7 +56,7 @@ const startAutoRefresh = (intervalMs = 60000) => {
       console.error("Auto refresh failed:", error.message);
     }
   }, intervalMs);
-};
+}
 
 module.exports = {
   fetchIdentifierData,
