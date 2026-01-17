@@ -1,4 +1,4 @@
-const { sendMessage } = require("../services/whatsappClient");
+const { sendMessage } = require("../lib/services/whatsapp/whatsappClient");
 
 const sendContactMessages = async (number, data) => {
   const message = `Pesan baru dari client AIG Nusa Hub\n\nNama: ${data.fullName}\nEmail: ${data.email}\nNo HP: ${data.phoneNumber} (${data.countryCode})\nSubjek: ${data.subject}\n\nPesan:\n*${data.message}*`;

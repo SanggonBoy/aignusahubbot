@@ -1,4 +1,4 @@
-const { sendMessage } = require("../services/whatsappClient");
+const { sendMessage } = require("../lib/services/whatsapp/whatsappClient");
 
 const formatTanggal = (dateString) => {
   const date = new Date(dateString);
