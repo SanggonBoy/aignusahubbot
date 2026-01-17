@@ -47,7 +47,7 @@ function getIdentifierData() {
   return identifierData;
 }
 
-function startAutoRefresh(intervalMs = 60000) {
+function startAutoRefresh(intervalMs = 86400000) {
   fetchIdentifierData();
   setInterval(async () => {
     try {

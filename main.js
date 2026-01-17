@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT;
 app.use(express.json());
 
-startAutoRefresh(60000);
+startAutoRefresh(86400000);
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
