@@ -33,3 +33,7 @@ build/
 
 # Firebase service account key
 serviceAccountKey.json
+
+# Redis dump file
+*.rdb
+
