@@ -18,11 +18,17 @@ const contactSchema = Joi.object({
     "string.email": "Please provide a valid email address",
   }),
 
-  phoneNumber: Joi.string().min(10).max(15).required().messages({
+  phoneNumber: Joi.string().min(10).max(20).required().messages({
     "string.empty": "Phone number is required",
     "any.required": "Phone number is required",
     "string.min": "Phone number must be at least {#limit} digits",
     "string.max": "Phone number cannot exceed {#limit} digits",
+  }),
+
+  countryCode: Joi.string().length(2).required().messages({
+    "string.empty": "Country code is required",
+    "any.required": "Country code is required",
+    "string.length": "Country code must be exactly {#limit} characters",
   }),
 
   subject: Joi.string().min(5).max(150).required().messages({
